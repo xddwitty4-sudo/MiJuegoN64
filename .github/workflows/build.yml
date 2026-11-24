@@ -1,0 +1,29 @@
+
+name: Crear ROM N64
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar proyecto
+        uses: actions/checkout@v4
+
+      - name: Preparar Libdragon
+        run: |
+          git clone --depth 1 https://github.com/DragonMinded/libdragon.git /tmp/libdragon
+
+      - name: Compilar ROM
+        run: |
+          docker build -t n64compiler /tmp/libdragon
+          docker run --rm -v "$PWD:/project" n64compiler bash -lc "cd /project && make"
+
+      - name: Guardar ROM
+        uses: actions/upload-artifact@v4
+        with:
+          name: MiJuegoN64
+          path: "*.z64"
+          
